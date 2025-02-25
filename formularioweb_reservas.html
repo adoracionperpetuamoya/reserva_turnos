@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reserva de Turnos</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    label { display: block; margin-top: 10px; }
+    select, input { width: 100%; padding: 5px; margin-top: 5px; }
+    button { margin-top: 20px; padding: 10px; background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+    button:hover { background-color: #45a049; }
+  </style>
+</head>
+<body>
+  <h1>Reserva de Turnos</h1>
+  <form id="reservaForm">
+    <label for="nombre">Nombre completo:</label>
+    <input type="text" id="nombre" required>
+
+    <label for="telefono">Teléfono:</label>
+    <input type="tel" id="telefono" required>
+
+    <label for="email">Email:</label>
+    <input type="email" id="email" required>
+
+    <label for="fecha">Fecha del turno:</label>
+    <input type="date" id="fecha" required>
+
+    <label for="hora">Hora de inicio:</label>
+    <select id="hora" required>
+      <option value="">Seleccione una hora</option>
+    </select>
+
+    <label for="recurrente">¿Es recurrente?</label>
+    <select id="recurrente" required>
+      <option value="No">No</option>
+      <option value="Todas las semanas">Todas las semanas</option>
+    </select>
+
+    <button type="submit">Reservar</button>
+  </form>
+
+  <script>
+    const CONFIG = {
+      CALENDAR_ID: "43e616fc4002887bd7d375460fb6171dff1ff4b36f1c2aea20d5feffa0562634@group.calendar.google.com", // Reemplaza con el ID de tu calendario
+      MAX_PERSONAS: 2,
+      HORAS: Array.from({length: 24}, (_, i) => `${i.toString().padStart(2, '0')}:00`),
+      SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzRXWudUV6u0-rs3gfoL2SRg1mlE_Z0_tPdpWUm46dBqtCL3ZGCJPjqcEJ2L8feVTYFrg/exec" // Reemplaza con la URL de tu script
+    };
+
+    async function obtenerHorasDisponibles(fecha) {
+      try {
+        const response = await fetch(`${CONFIG.SCRIPT_URL}?action=obtenerHoras&fecha=${fecha}`);
+        const data = await response.json();
+        if (data.success) {
+          return data.horasDisponibles;
+        } else {
+          throw new Error(data.message || "Error al obtener horas");
+        }
+      } catch (error) {
+        console.error("Error en obtenerHorasDisponibles:", error);
+        return [];
+      }
+    }
+
+    document.getElementById('fecha').addEventListener('change', async function() {
+      const fecha = this.value;
+      if (fecha) {
+        const horasDisponibles = await obtenerHorasDisponibles(fecha);
+        const horaSelect = document.getElementById('hora');
+        horaSelect.innerHTML = '<option value="">Seleccione una hora</option>';
+        horasDisponibles.forEach(hora => {
+          const option = document.createElement('option');
+          option.value = hora;
+          option.textContent = hora;
+          horaSelect.appendChild(option);
+        });
+      }
+    });
+
+    document.getElementById('reservaForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const datos = {
+        action: "reservar",
+        nombre: document.getElementById('nombre').value,
+        telefono: document.getElementById('telefono').value,
+        email: document.getElementById('email').value,
+        fecha: document.getElementById('fecha').value,
+        hora: document.getElementById('hora').value,
+        recurrente: document.getElementById('recurrente').value
+      };
+
+      try {
+        const response = await fetch(CONFIG.SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify(datos),
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const result = await response.json();
+        if (result.success) {
+          alert('Reserva exitosa');
+        } else {
+          alert('Error: ' + result.message);
+        }
+      } catch (error) {
+        console.error("Error al enviar reserva:", error);
+        alert('Error al enviar la reserva: ' + error.message);
+      }
+    });
+  </script>
+</body>
+</html>
