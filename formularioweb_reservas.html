@@ -14,26 +14,27 @@
 </head>
 <body>
   <h1>Reserva de Turnos</h1>
-  <form id="reservaForm">
+  <form id="reservaForm" action="https://script.google.com/macros/s/AKfycbzACZ3H3pnNlmzTuf08xh2RBgxpzEKCUyZYRIZXak6BdsxGq4PAgUSNcSI6PhNwaYlnOQ/exec" method="POST">
+    <input type="hidden" name="action" value="reservar">
     <label for="nombre">Nombre completo:</label>
-    <input type="text" id="nombre" required>
+    <input type="text" id="nombre" name="nombre" required>
 
     <label for="telefono">Teléfono:</label>
-    <input type="tel" id="telefono" required>
+    <input type="tel" id="telefono" name="telefono" required>
 
     <label for="email">Email:</label>
-    <input type="email" id="email" required>
+    <input type="email" id="email" name="email" required>
 
     <label for="fecha">Fecha del turno:</label>
-    <input type="date" id="fecha" required>
+    <input type="date" id="fecha" name="fecha" required>
 
     <label for="hora">Hora de inicio:</label>
-    <select id="hora" required>
+    <select id="hora" name="hora" required>
       <option value="">Seleccione una hora</option>
     </select>
 
     <label for="recurrente">¿Es recurrente?</label>
-    <select id="recurrente" required>
+    <select id="recurrente" name="recurrente" required>
       <option value="No">No</option>
       <option value="Todas las semanas">Todas las semanas</option>
     </select>
@@ -43,31 +44,26 @@
 
   <script>
     const CONFIG = {
-      CALENDAR_ID: "43e616fc4002887bd7d375460fb6171dff1ff4b36f1c2aea20d5feffa0562634@group.calendar.google.com", // Reemplaza con el ID de tu calendario
-      MAX_PERSONAS: 2,
-      HORAS: Array.from({length: 24}, (_, i) => `${i.toString().padStart(2, '0')}:00`),
-      SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzRXWudUV6u0-rs3gfoL2SRg1mlE_Z0_tPdpWUm46dBqtCL3ZGCJPjqcEJ2L8feVTYFrg/exec" // Reemplaza con la URL de tu script
+      SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzACZ3H3pnNlmzTuf08xh2RBgxpzEKCUyZYRIZXak6BdsxGq4PAgUSNcSI6PhNwaYlnOQ/exec" // Reemplaza con la URL de tu script
     };
 
-    async function obtenerHorasDisponibles(fecha) {
-      try {
-        const response = await fetch(`${CONFIG.SCRIPT_URL}?action=obtenerHoras&fecha=${fecha}`);
-        const data = await response.json();
-        if (data.success) {
-          return data.horasDisponibles;
-        } else {
-          throw new Error(data.message || "Error al obtener horas");
-        }
-      } catch (error) {
-        console.error("Error en obtenerHorasDisponibles:", error);
-        return [];
-      }
+    function obtenerHorasDisponibles(fecha, callback) {
+      const script = document.createElement('script');
+      script.src = `${CONFIG.SCRIPT_URL}?action=obtenerHoras&fecha=${fecha}&callback=${callback}`;
+      document.head.appendChild(script);
+      script.onload = () => document.head.removeChild(script);
     }
 
-    document.getElementById('fecha').addEventListener('change', async function() {
+    document.getElementById('fecha').addEventListener('change', function() {
       const fecha = this.value;
       if (fecha) {
-        const horasDisponibles = await obtenerHorasDisponibles(fecha);
+        obtenerHorasDisponibles(fecha, 'handleHorasResponse');
+      }
+    });
+
+    window.handleHorasResponse = function(data) {
+      if (data.success) {
+        const horasDisponibles = data.horasDisponibles;
         const horaSelect = document.getElementById('hora');
         horaSelect.innerHTML = '<option value="">Seleccione una hora</option>';
         horasDisponibles.forEach(hora => {
@@ -76,38 +72,10 @@
           option.textContent = hora;
           horaSelect.appendChild(option);
         });
+      } else {
+        console.error("Error al obtener horas:", data.message);
       }
-    });
-
-    document.getElementById('reservaForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const datos = {
-        action: "reservar",
-        nombre: document.getElementById('nombre').value,
-        telefono: document.getElementById('telefono').value,
-        email: document.getElementById('email').value,
-        fecha: document.getElementById('fecha').value,
-        hora: document.getElementById('hora').value,
-        recurrente: document.getElementById('recurrente').value
-      };
-
-      try {
-        const response = await fetch(CONFIG.SCRIPT_URL, {
-          method: 'POST',
-          body: JSON.stringify(datos),
-          headers: { 'Content-Type': 'application/json' }
-        });
-        const result = await response.json();
-        if (result.success) {
-          alert('Reserva exitosa');
-        } else {
-          alert('Error: ' + result.message);
-        }
-      } catch (error) {
-        console.error("Error al enviar reserva:", error);
-        alert('Error al enviar la reserva: ' + error.message);
-      }
-    });
+    };
   </script>
 </body>
 </html>
