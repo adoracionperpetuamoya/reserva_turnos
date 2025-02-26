@@ -5,11 +5,56 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reserva de Turnos</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    label { display: block; margin-top: 10px; }
-    select, input { width: 100%; padding: 5px; margin-top: 5px; }
-    button { margin-top: 20px; padding: 10px; background-color: #4CAF50; color: white; border: none; cursor: pointer; }
-    button:hover { background-color: #45a049; }
+    body {
+      font-family: 'Georgia', serif; /* Fuente elegante y suave */
+      background-color: #f5f5f5; /* Fondo gris claro */
+      padding: 20px;
+      color: #333; /* Texto oscuro para contraste */
+    }
+    h1 {
+      text-align: center;
+      color: #8B4513; /* Marrón cálido para el título */
+      font-size: 2em;
+      margin-bottom: 30px;
+    }
+    #reservaForm {
+      max-width: 500px; /* Ancho máximo para el formulario */
+      margin: 0 auto; /* Centrado horizontal */
+      background-color: #fff; /* Fondo blanco para el formulario */
+      padding: 25px;
+      border-radius: 10px; /* Bordes redondeados */
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+      color: #5A3E36; /* Marrón oscuro para etiquetas */
+    }
+    select, input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc; /* Borde gris claro */
+      border-radius: 5px; /* Bordes redondeados */
+      font-size: 1em;
+      box-sizing: border-box; /* Para que el padding no afecte el ancho */
+    }
+    button {
+      margin-top: 25px;
+      padding: 12px;
+      width: 100%;
+      background-color: #8B4513; /* Marrón cálido para el botón */
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1.1em;
+      transition: background-color 0.3s; /* Transición suave al hover */
+    }
+    button:hover {
+      background-color: #5A3E36; /* Marrón más oscuro al pasar el ratón */
+    }
   </style>
 </head>
 <body>
@@ -44,7 +89,7 @@
 
   <script>
     const CONFIG = {
-      SCRIPT_URL: "https://script.google.com/macros/s/AKfycbytZxvjWYQL4XJyq3xC_c53DYVuvKpjSVpdgy-MHdAZO1zJJn5dCofYzIQTwRoEMQxoNQ/exec" // Reemplaza con la nueva URL
+      SCRIPT_URL: "https://script.google.com/macros/s/AKfycbytZxvjWYQL4XJyq3xC_c53DYVuvKpjSVpdgy-MHdAZO1zJJn5dCofYzIQTwRoEMQxoNQ/exec" // Reemplaza con la URL de tu script
     };
 
     function obtenerHorasDisponibles(fecha, callback) {
